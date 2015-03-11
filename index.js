@@ -123,6 +123,7 @@
       navigate(instance, targetPath);
     } else {
       var selectedIndex = findSelectedIndex(instance, target.getAttribute('data-path'));
+      var triggeredItem = instance.selected[selectedIndex];
       if (selectedIndex !== -1) {
         instance.selected.splice(selectedIndex, 1);
       }
@@ -139,7 +140,7 @@
         }
       }
       if (typeof instance.selectCb === 'function') {
-        instance.selectCb(instance.selected);
+        instance.selectCb(triggeredItem, instance.selected);
       }
     }
   }
