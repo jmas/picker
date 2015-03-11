@@ -1,20 +1,4 @@
-body {
-  font-family: sans-serif;
-}
-
-a[nohref], a[nofollow] {
-  color: blue;
-  cursor: pointer;
-}
-
 .filespart {
-  /*position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  margin: auto;
-  height: 455px;*/
   background-color: #fff;
   overflow: hidden;
   border: 1px solid #eee;
@@ -24,7 +8,6 @@ a[nohref], a[nofollow] {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-  /* max-width: 755px; */
 }
 
 .filespart-breadcrumbs {
