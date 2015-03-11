@@ -17,6 +17,16 @@
     return null;
   }
   
+  function findSelectedIndex(instance, itemPath) {
+    var i,ln;
+    for (i=0,ln=instance.selected.length; i<ln; i++) {
+      if (instance.selected[i].path === itemPath) {
+        return i;
+      }
+    }
+    return -1;
+  }
+  
   function render(instance) {
     // render container if needed
     if (! instance.containerRendered) {
@@ -100,16 +110,6 @@
         }
       }, instance.path, foundedItem);
     }
-  }
-  
-  function findSelectedIndex(instance, itemPath) {
-    var i,ln;
-    for (i=0,ln=instance.selected.length; i<ln; i++) {
-      if (instance.selected[i].path === itemPath) {
-        return i;
-      }
-    }
-    return -1;
   }
   
   function whenBreadcrumbsNavigate(instance, target) {
