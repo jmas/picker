@@ -1,0 +1,187 @@
+body {
+  font-family: sans-serif;
+}
+
+a[nohref], a[nofollow] {
+  color: blue;
+  cursor: pointer;
+}
+
+.filespart {
+  /*position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: auto;
+  height: 455px;*/
+  background-color: #fff;
+  overflow: hidden;
+  border: 1px solid #eee;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  /* max-width: 755px; */
+}
+
+.filespart-breadcrumbs {
+  padding: 1em;
+  border-bottom: 1px solid #eee;
+  background-color: #fafafa;
+}
+
+.filespart-breadcrumbs-item {
+  margin-right: .6em;
+}
+
+.filespart-breadcrumbs-item:after {
+  content: "➝";
+  margin-left: .8em;
+  color: #888;
+}
+
+.filespart-breadcrumbs-item:last-child:after {
+  content: "";
+}
+
+.filespart-files {
+  padding: .5em;
+  max-height: 20em;
+  overflow: auto;
+}
+
+.filespart-files-inside {
+  overflow: hidden;
+}
+
+.filespart-files-item {
+  position: relative;
+  display: block;
+  cursor: pointer;
+  margin: .5em;
+}
+
+.filespart-files-item input {
+  display: none;
+}
+
+.filespart-files-mark {
+  position: absolute;
+  background-color: blue;
+  width: 3em;
+  height: 3em;
+  border-radius: 100%;
+  opacity: 0;
+  display: block;
+  transition: .1s;
+  background-image: url(http://raw.githubusercontent.com/google/material-design-icons/master/action/1x_web/ic_done_white_18dp.png);
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.filespart-files-item input:checked + .filespart-files-mark {
+  opacity: .8;
+}
+
+.filespart-files-icon {
+  display: block;
+  border: 1px solid #eee;
+  height: 5em;
+  background-color: #fafafa;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.filespart-files-icon-havebg {
+  background-size: cover;
+}
+
+.filespart-files-icon-file {
+  background-image: url(https://raw.githubusercontent.com/google/material-design-icons/master/file/1x_web/ic_folder_black_48dp.png);
+}
+
+.filespart-files-icon-image {
+  background-image: url(https://raw.githubusercontent.com/google/material-design-icons/master/image/1x_web/ic_image_black_48dp.png);
+}
+
+.filespart-files-name {
+  display: block;
+  line-height: 1em;
+  border: 1px solid #eee;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background-color: #fafafa;
+  color: #888;
+}
+
+.filespart-files-item:hover .filespart-files-icon,
+.filespart-files-item:hover .filespart-files-name {
+  border-color: #ddd;
+  color: #444;
+}
+
+.filespart-actions {
+  padding: 1em;
+  border-top: 1px solid #eee;
+  background-color: #fafafa;
+}
+
+.filespart-actions-item {
+  margin-right: 1em;
+}
+
+.filespart-files-icons .filespart-files-item {
+  float: left;
+  width: 8em;
+  height: 8em;
+  margin-bottom: 0;
+}
+
+.filespart-files-icons .filespart-files-name {
+  margin-top: -1px;
+  padding: .5em;
+  font-size: .9em;
+  text-align: center;
+}
+
+.filespart-files-icons .filespart-files-mark {
+  top: 1.4em;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+}
+
+.filespart-files-list .filespart-files-item {
+  overflow: hidden;
+}
+
+.filespart-files-list .filespart-files-icon {
+  float: left;
+  width: 3em;
+  height: 3em;
+}
+
+.filespart-files-list .filespart-files-mark {
+  top: 1px;
+  left: 1px;
+}
+
+.filespart-files-list .filespart-files-name {
+  line-height: 3em;
+  margin-left: -1px;
+  text-align: left;
+  padding: 0 .5em;
+}
+
+.filespart-files-list .filespart-files-icon-folder {
+  background-size: 70%;
+}
+
+.filespart-files-icon-folder {
+  background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAAA3NCSVQICAjb4U/gAAAACXBIWXMAAAGpAAABqQEMBjChAAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAAAFRQTFRF////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAsI6hEwAAABt0Uk5TAAUHFRwwOD5QVVdwcYCOkKOqsMXH0OPq7Pj65uqxfQAAAO1JREFUWMPt1LEOgkAURNErIooiiiKK8///acGjsuJNYwzT78lmuQHW/cD0tbMLLBTkCnIFuYJcQa4gV1BiK/C3wOD+UDoXaFygMoGxAHaJ93wE0ANcEsApgBbYPJeff28DqIFD4gK3+Q1K4JYADgEMwPa9/PxzE0AHnBIXuMyfsQEeCWA3A1U2ggDGIhtBAH06ggDadAQB1OkIAijTEUzAkI9gArp8BBPQ5COYgCofASCNRT4CQOqNCACpNSIApNqIAJBKIwJAgxMBoM6JAFDjRABo70QAjEcnAqC3IgCuVgTA3YoAeFkRrPuNfQA67vzqcECy0gAAAABJRU5ErkJggge1eb292245e478ca94d069580f8269b2);
+  background-color: #eee;
+}
