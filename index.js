@@ -135,10 +135,14 @@
               if (findSelectedIndex(instance, inputs[i].getAttribute('data-path')) === -1) {
                 instance.selected.push(instance.items[j]);
               }
-              triggeredItem = instance.items[j];
               break;
             }
           }
+        }
+      }
+      for (j=0,lnj=instance.items.length; j<lnj; j++) {
+        if (targetPath === instance.items[j].path) {
+          triggeredItem = instance.items[j];
         }
       }
       if (typeof instance.selectCb === 'function') {
