@@ -142,8 +142,9 @@
     });
     // You can define this handler for retrive selected items.
     // This handler is triggered each time when user select item.
-    picker1.onSelect(function(items) {
-      console && console.log('Selected items: ', items);
+    picker1.onSelect(function(triggeredItem, selectedItems) {
+      console && console.log('Triggered item: ', triggeredItem);
+      console && console.log('Selected items: ', selectedItems);
     });
     // You need to call this function for trigger onNavigate handler.
     picker1.navigate();
