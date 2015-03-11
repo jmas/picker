@@ -159,10 +159,8 @@
       viewMode: 'list'
     };
     // assign options
-    if (typeof o === 'object') {
-      for (var k in options) {
-        this[k] = typeof o[k] !== 'undefined' ? o[k]: options[k];
-      }
+    for (var k in options) {
+      this[k] = typeof o === 'object' && typeof o[k] !== 'undefined' ? o[k]: options[k];
     }
     // render it
     render(this);
