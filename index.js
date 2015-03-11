@@ -183,6 +183,7 @@
       return this;
     },
     navigate: function(newPath) {
+      newPath = String(newPath);
       navigate(this, newPath);
       return this;
     },
