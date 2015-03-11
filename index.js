@@ -196,6 +196,11 @@
       render(this);
       return this;
     },
+    deselectAll: function() {
+      this.selected = [];
+      render(this);
+      return this;
+    },
     getSelected: function() {
       return this.selected;
     }
