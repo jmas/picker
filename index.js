@@ -168,7 +168,7 @@
   };
   
   Cls.prototype = {
-    onSelect: function() {
+    onSelect: function(cb) {
       if (typeof cb === 'function') {
         this.selectCb = cb;
       }
