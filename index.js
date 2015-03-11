@@ -144,7 +144,7 @@
     }
   }
   
-  var Instance = function(o) {
+  var Cls = function(o) {
     // new options list
     var options = {
       selectCb: null,
@@ -169,7 +169,7 @@
     return this;
   };
   
-  Instance.prototype = {
+  Cls.prototype = {
     onSelect: function() {
       if (typeof cb === 'function') {
         this.selectCb = cb;
@@ -196,5 +196,5 @@
     }
   };
   
-  window.Picker = Instance;
+  window.Picker = Cls;
 })();
