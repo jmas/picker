@@ -123,17 +123,19 @@
       navigate(instance, targetPath);
     } else {
       var selectedIndex = findSelectedIndex(instance, target.getAttribute('data-path'));
-      var triggeredItem = instance.selected[selectedIndex];
       if (selectedIndex !== -1) {
         instance.selected.splice(selectedIndex, 1);
       }
       var inputs = instance.itemsContainer.getElementsByTagName('INPUT');
-      var i,j,lni,lnj;
+      var i,j,lni,lnj,triggeredItem;
       for (i=0,lni=inputs.length; i<lni; i++) {
         if (inputs[i].hasAttribute('data-path') && inputs[i].checked) {
           for (j=0,lnj=instance.items.length; j<lnj; j++) {
-            if (inputs[i].getAttribute('data-path') === instance.items[j].path && findSelectedIndex(instance, inputs[i].getAttribute('data-path')) === -1) {
-              instance.selected.push(instance.items[j]);
+            if (inputs[i].getAttribute('data-path') === instance.items[j].path) {
+              if (findSelectedIndex(instance, inputs[i].getAttribute('data-path')) === -1) {
+                instance.selected.push(instance.items[j]);
+              }
+              triggeredItem = instance.items[j];
               break;
             }
           }
