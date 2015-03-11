@@ -29,10 +29,14 @@
 
   <script src="index.js"></script>
   <script>
+    // First picker instance
     var picker1 = new Picker({
-      container: document.getElementById('picker-1')
+      container: document.getElementById('picker-1') // Optional.
+      // viewMode: 'icons',
+      // viewMode: 'list'
     });
-    
+    // You need to define this hadler for async requests for get picker items.
+    // When user click on folder - this handler is triggered.
     picker1.onNavigate(function(cb, path, item) {
       cb([
         {
@@ -136,9 +140,15 @@
         }
       ]);
     });
-    
+    // You can define this handler for retrive selected items.
+    // This handler is triggered each time when user select item.
+    picker1.onSelect(function(items) {
+      console && console.log('Selected items: ', items);
+    });
+    // You need to call this function for trigger onNavigate handler.
     picker1.navigate();
     
+    // Second picker instance
     var picker2 = new Picker({
       container: document.getElementById('picker-2'),
       viewMode: 'icons'
