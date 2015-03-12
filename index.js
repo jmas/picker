@@ -2,7 +2,7 @@
   'use strict';
   
   var tpl = '<div class="filespart"><div class="filespart-breadcrumbs" data-breadcrumbs-container></div><div class="filespart-files"><div class="filespart-files-inside" data-items-container></div></div>';
-  var itemTpl = '<label class="filespart-files-item" data-folder="{folder}" data-path="{path}"><span class="filespart-files-icon {iconClasses}" {iconAttrs}></span><span class="filespart-files-name">{name}</a><input type="checkbox" data-path="{path}" {checked} /><span class="filespart-files-mark"></span></label>';
+  var itemTpl = '<label class="filespart-files-item" data-folder="{folder}" data-path="{path}"><span class="filespart-files-icon {iconClasses}" {iconAttrs}></span><span class="filespart-files-name" title="{name}">{name}</a><input type="checkbox" data-path="{path}" {checked} /><span class="filespart-files-mark"></span></label>';
   var breadcrumbTpl = '<a class="filespart-breadcrumbs-item" nohref nofollow data-path="{path}">{name}</a>';
   var body = document.getElementsByTagName('BODY')[0];
   
@@ -39,12 +39,12 @@
       instance.breadcrumbsContainer = instance.container.querySelector('[data-breadcrumbs-container]');
       instance.breadcrumbsContainer.onclick = function(event) {
         event.stopPropagation();
-        whenBreadcrumbsNavigate(instance, findParentNodeWithAttr(event.target, 'data-path'));
+        whenBreadcrumbsNavigate(instance, findParentNodeWithAttr(event.target, 'data-path'), event);
       };
       instance.itemsContainer.onclick = function(event) {
         if (event.target.hasAttribute('data-path')) {
           event.stopPropagation();
-          whenItemsNavigate(instance, findParentNodeWithAttr(event.target, 'data-folder'));
+          whenItemsNavigate(instance, findParentNodeWithAttr(event.target, 'data-folder'), event);
         }
       };
       instance.containerRendered = true;
@@ -58,7 +58,7 @@
       instance.itemsContainer.appendChild(el);
       iconClasses = typeof instance.items[i].iconClasses === 'undefined' ? '': instance.items[i].iconClasses;
       iconStyles = '';
-      if (typeof instance.items[i].iconImage !== 'undefined') {
+      if (typeof instance.items[i].iconImage !== 'undefined' && instance.items[i].iconImage !== null) {
         iconStyles += 'background-image:url('+instance.items[i].iconImage+');';
         iconClasses += ' filespart-files-icon-havebg ';
       }
@@ -106,9 +106,10 @@
         if (newItems instanceof Array) {
           instance.items = newItems;
           instance.path = newPath;
+          instance.itemsContainer.parentNode.scrollTop = 0;
           render(instance);
         }
-      }, instance.path, foundedItem);
+      }, newPath, foundedItem);
     }
   }
   
@@ -116,7 +117,7 @@
     navigate(instance, target.getAttribute('data-path'));
   }
   
-  function whenItemsNavigate(instance, target) {
+  function whenItemsNavigate(instance, target, event) {
     var targetFolder = target.getAttribute('data-folder') === 'true' ? true: false;
     var targetPath = target.getAttribute('data-path');
     if (targetFolder) {
@@ -146,7 +147,7 @@
         }
       }
       if (typeof instance.selectCb === 'function') {
-        instance.selectCb(triggeredItem, instance.selected);
+        instance.selectCb(triggeredItem, instance.selected, event);
       }
     }
   }

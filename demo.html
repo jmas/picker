@@ -16,10 +16,10 @@
     }
 
     
-    #picker-1 {
+    /*#picker-1 {
       width: 50%;
       float:left;
-    }
+    }*/
   </style>
 </head>
 <body>
@@ -29,126 +29,163 @@
 
   <p>
     <button id="use-selected-1-btn">Use Selected of 1</button>
-    <button id="use-selected-2-btn">Use Selected of 2</button>
+    <!-- <button id="use-selected-2-btn">Use Selected of 2</button> -->
     <button id="set-listmode-btn">Set List mode</button>
     <button id="set-iconsmode-btn">Set Icons mode</button>
   </p>
   
   <p id="selected-output-1"></p>
-  <p id="selected-output-2"></p>
+  <!-- <p id="selected-output-2"></p> -->
 
   <script src="index.js"></script>
   <script>
+    function getJson(url, callback) {
+      var request = new XMLHttpRequest();
+      request.open('GET', url, true);
+      request.onload = function() {
+        if (request.status >= 200 && request.status < 400) {
+          // Success
+          if (typeof callback === 'function') {
+            callback(null, JSON.parse(request.responseText));
+          }
+        } else if (request.status === 401) {
+          window.__resumeGetJson = function() {
+            getJson(url, callback);
+          };
+          window.open('oauth.php');
+        } else {
+          // We reached our target server, but it returned an error
+          if (typeof callback === 'function') {
+            callback("We get error from service.");
+          }
+        }
+      };
+      request.onerror = function() {
+        // There was a connection error of some sort
+        if (typeof callback === 'function') {
+          callback("We can't request service.");
+        }
+      };
+      request.send();
+    }
+
     // First picker instance
     var picker1 = new Picker({
-      container: document.getElementById('picker-1') // Optional.
-      // viewMode: 'icons',
+      container: document.getElementById('picker-1'), // Optional.
+      viewMode: 'icons'
       // viewMode: 'list'
     });
     // You need to define this hadler for async requests for get picker items.
     // When user click on folder - this handler is triggered.
-    picker1.onNavigate(function(cb, path, item) {
-      cb([
-        {
-          name: 'folder_111',
-          path: 'ftp/path1/folder111',
-          folder: true,
-          iconClasses: 'filespart-files-icon-folder'
-        },
-        {
-          name: 'file_112.jpg',
-          path: 'ftp/path1/file_112.jpg',
-          folder: false,
-          iconColor: 'red'
-        },
-        {
-          name: 'file_113.jpg',
-          path: 'ftp/path1/file_113.jpg',
-          folder: false,
-          iconColor: 'green'
-        },
-        {
-          name: 'folder_114',
-          path: 'ftp/path1/folder114',
-          folder: true,
-          iconClasses: 'filespart-files-icon-folder'
-        },
-        {
-          name: 'file_115.jpg',
-          path: 'ftp/path1/file_115.jpg',
-          folder: false,
-          iconImage: 'http://www.keenthemes.com/preview/metronic/theme/assets/global/plugins/jcrop/demos/demo_files/image2.jpg'
-        },
-        {
-          name: 'file_116.jpg',
-          path: 'ftp/path1/file_116.jpg',
-          folder: false
-        },
-        {
-          name: 'folder_117',
-          path: 'ftp/path1/folder117',
-          folder: true,
-          iconClasses: 'filespart-files-icon-folder'
-        },
-        {
-          name: 'file_12.jpg',
-          path: 'ftp/path1/file_12.jpg',
-          folder: false
-        },
-        {
-          name: 'file_13.jpg',
-          path: 'ftp/path1/file_13.jpg',
-          folder: false
-        },
-        {
-          name: 'folder_14',
-          path: 'ftp/path1/folder14',
-          folder: true,
-          iconClasses: 'filespart-files-icon-folder'
-        },
-        {
-          name: 'file_15.jpg',
-          path: 'ftp/path1/file_15.jpg',
-          folder: false
-        },
-        {
-          name: 'file_16.jpg',
-          path: 'ftp/path1/file_16.jpg',
-          folder: false
-        },
-        {
-          name: 'folder_17',
-          path: 'ftp/path1/folder17',
-          folder: true,
-          iconClasses: 'filespart-files-icon-folder'
-        },
-        {
-          name: 'file_1.jpg',
-          path: 'ftp/path1/file_1.jpg',
-          folder: false
-        },
-        {
-          name: 'file_18.jpg',
-          path: 'ftp/path1/file_18.jpg',
-          folder: false
-        },
-        {
-          name: 'folder_19',
-          path: 'ftp/path1/folder19',
-          folder: true,
-          iconClasses: 'filespart-files-icon-folder'
-        },
-        {
-          name: 'file_1.jpg',
-          path: 'ftp/path1/file_1.jpg',
-          folder: false
-        },
-        {
-          name: 'file_10.jpg',
-          path: 'ftp/path1/file_10.jpg',
-          folder: false
+    picker1.onNavigate(function(callback, path, item) {
+      getJson('service.php?path=' + path, function(error, data) {
+        if (error) {
+          alert(error);
+          return;
         }
-      ]);
+        callback(data.result);
+      });
+      // cb([
+      //   {
+      //     name: 'folder_111',
+      //     path: 'ftp/path1/folder111',
+      //     folder: true,
+      //     iconClasses: 'filespart-files-icon-folder'
+      //   },
+      //   {
+      //     name: 'file_112.jpg',
+      //     path: 'ftp/path1/file_112.jpg',
+      //     folder: false,
+      //     iconColor: 'red'
+      //   },
+      //   {
+      //     name: 'file_113.jpg',
+      //     path: 'ftp/path1/file_113.jpg',
+      //     folder: false,
+      //     iconColor: 'green'
+      //   },
+      //   {
+      //     name: 'folder_114',
+      //     path: 'ftp/path1/folder114',
+      //     folder: true,
+      //     iconClasses: 'filespart-files-icon-folder'
+      //   },
+      //   {
+      //     name: 'file_115.jpg',
+      //     path: 'ftp/path1/file_115.jpg',
+      //     folder: false,
+      //     iconImage: 'http://www.keenthemes.com/preview/metronic/theme/assets/global/plugins/jcrop/demos/demo_files/image2.jpg'
+      //   },
+      //   {
+      //     name: 'file_116.jpg',
+      //     path: 'ftp/path1/file_116.jpg',
+      //     folder: false
+      //   },
+      //   {
+      //     name: 'folder_117',
+      //     path: 'ftp/path1/folder117',
+      //     folder: true,
+      //     iconClasses: 'filespart-files-icon-folder'
+      //   },
+      //   {
+      //     name: 'file_12.jpg',
+      //     path: 'ftp/path1/file_12.jpg',
+      //     folder: false
+      //   },
+      //   {
+      //     name: 'file_13.jpg',
+      //     path: 'ftp/path1/file_13.jpg',
+      //     folder: false
+      //   },
+      //   {
+      //     name: 'folder_14',
+      //     path: 'ftp/path1/folder14',
+      //     folder: true,
+      //     iconClasses: 'filespart-files-icon-folder'
+      //   },
+      //   {
+      //     name: 'file_15.jpg',
+      //     path: 'ftp/path1/file_15.jpg',
+      //     folder: false
+      //   },
+      //   {
+      //     name: 'file_16.jpg',
+      //     path: 'ftp/path1/file_16.jpg',
+      //     folder: false
+      //   },
+      //   {
+      //     name: 'folder_17',
+      //     path: 'ftp/path1/folder17',
+      //     folder: true,
+      //     iconClasses: 'filespart-files-icon-folder'
+      //   },
+      //   {
+      //     name: 'file_1.jpg',
+      //     path: 'ftp/path1/file_1.jpg',
+      //     folder: false
+      //   },
+      //   {
+      //     name: 'file_18.jpg',
+      //     path: 'ftp/path1/file_18.jpg',
+      //     folder: false
+      //   },
+      //   {
+      //     name: 'folder_19',
+      //     path: 'ftp/path1/folder19',
+      //     folder: true,
+      //     iconClasses: 'filespart-files-icon-folder'
+      //   },
+      //   {
+      //     name: 'file_1.jpg',
+      //     path: 'ftp/path1/file_1.jpg',
+      //     folder: false
+      //   },
+      //   {
+      //     name: 'file_10.jpg',
+      //     path: 'ftp/path1/file_10.jpg',
+      //     folder: false
+      //   }
+      // ]);
     });
     // You can define this handler for retrive selected items.
     // This handler is triggered each time when user select item.
@@ -160,124 +197,124 @@
     picker1.navigate();
     
     // Second picker instance
-    var picker2 = new Picker({
-      container: document.getElementById('picker-2'),
-      viewMode: 'icons'
-    });
+    // var picker2 = new Picker({
+    //   container: document.getElementById('picker-2'),
+    //   viewMode: 'icons'
+    // });
     
-    picker2.onNavigate(function(cb, path, item) {
-      cb([
-        {
-          name: 'folder_111',
-          path: 'ftp/path1/folder111',
-          folder: true,
-          iconClasses: 'filespart-files-icon-folder'
-        },
-        {
-          name: 'file_112.jpg',
-          path: 'ftp/path1/file_112.jpg',
-          folder: false,
-          iconColor: 'red'
-        },
-        {
-          name: 'file_113.jpg',
-          path: 'ftp/path1/file_113.jpg',
-          folder: false,
-          iconColor: 'green'
-        },
-        {
-          name: 'folder_114',
-          path: 'ftp/path1/folder114',
-          folder: true,
-          iconClasses: 'filespart-files-icon-folder'
-        },
-        {
-          name: 'file_115.jpg',
-          path: 'ftp/path1/file_115.jpg',
-          folder: false,
-          iconImage: 'http://www.keenthemes.com/preview/metronic/theme/assets/global/plugins/jcrop/demos/demo_files/image2.jpg'
-        },
-        {
-          name: 'file_116.jpg',
-          path: 'ftp/path1/file_116.jpg',
-          folder: false
-        },
-        {
-          name: 'folder_117',
-          path: 'ftp/path1/folder117',
-          folder: true,
-          iconClasses: 'filespart-files-icon-folder'
-        },
-        {
-          name: 'file_12.jpg',
-          path: 'ftp/path1/file_12.jpg',
-          folder: false
-        },
-        {
-          name: 'file_13.jpg',
-          path: 'ftp/path1/file_13.jpg',
-          folder: false
-        },
-        {
-          name: 'folder_14',
-          path: 'ftp/path1/folder14',
-          folder: true,
-          iconClasses: 'filespart-files-icon-folder'
-        },
-        {
-          name: 'file_15.jpg',
-          path: 'ftp/path1/file_15.jpg',
-          folder: false
-        },
-        {
-          name: 'file_16.jpg',
-          path: 'ftp/path1/file_16.jpg',
-          folder: false
-        },
-        {
-          name: 'folder_17',
-          path: 'ftp/path1/folder17',
-          folder: true,
-          iconClasses: 'filespart-files-icon-folder'
-        },
-        {
-          name: 'file_1.jpg',
-          path: 'ftp/path1/file_1.jpg',
-          folder: false
-        },
-        {
-          name: 'file_18.jpg',
-          path: 'ftp/path1/file_18.jpg',
-          folder: false
-        },
-        {
-          name: 'folder_19',
-          path: 'ftp/path1/folder19',
-          folder: true,
-          iconClasses: 'filespart-files-icon-folder'
-        },
-        {
-          name: 'file_1.jpg',
-          path: 'ftp/path1/file_1.jpg',
-          folder: false
-        },
-        {
-          name: 'file_10.jpg',
-          path: 'ftp/path1/file_10.jpg',
-          folder: false
-        }
-      ]);
-    });
+    // picker2.onNavigate(function(cb, path, item) {
+    //   cb([
+    //     {
+    //       name: 'folder_111',
+    //       path: 'ftp/path1/folder111',
+    //       folder: true,
+    //       iconClasses: 'filespart-files-icon-folder'
+    //     },
+    //     {
+    //       name: 'file_112.jpg',
+    //       path: 'ftp/path1/file_112.jpg',
+    //       folder: false,
+    //       iconColor: 'red'
+    //     },
+    //     {
+    //       name: 'file_113.jpg',
+    //       path: 'ftp/path1/file_113.jpg',
+    //       folder: false,
+    //       iconColor: 'green'
+    //     },
+    //     {
+    //       name: 'folder_114',
+    //       path: 'ftp/path1/folder114',
+    //       folder: true,
+    //       iconClasses: 'filespart-files-icon-folder'
+    //     },
+    //     {
+    //       name: 'file_115.jpg',
+    //       path: 'ftp/path1/file_115.jpg',
+    //       folder: false,
+    //       iconImage: 'http://www.keenthemes.com/preview/metronic/theme/assets/global/plugins/jcrop/demos/demo_files/image2.jpg'
+    //     },
+    //     {
+    //       name: 'file_116.jpg',
+    //       path: 'ftp/path1/file_116.jpg',
+    //       folder: false
+    //     },
+    //     {
+    //       name: 'folder_117',
+    //       path: 'ftp/path1/folder117',
+    //       folder: true,
+    //       iconClasses: 'filespart-files-icon-folder'
+    //     },
+    //     {
+    //       name: 'file_12.jpg',
+    //       path: 'ftp/path1/file_12.jpg',
+    //       folder: false
+    //     },
+    //     {
+    //       name: 'file_13.jpg',
+    //       path: 'ftp/path1/file_13.jpg',
+    //       folder: false
+    //     },
+    //     {
+    //       name: 'folder_14',
+    //       path: 'ftp/path1/folder14',
+    //       folder: true,
+    //       iconClasses: 'filespart-files-icon-folder'
+    //     },
+    //     {
+    //       name: 'file_15.jpg',
+    //       path: 'ftp/path1/file_15.jpg',
+    //       folder: false
+    //     },
+    //     {
+    //       name: 'file_16.jpg',
+    //       path: 'ftp/path1/file_16.jpg',
+    //       folder: false
+    //     },
+    //     {
+    //       name: 'folder_17',
+    //       path: 'ftp/path1/folder17',
+    //       folder: true,
+    //       iconClasses: 'filespart-files-icon-folder'
+    //     },
+    //     {
+    //       name: 'file_1.jpg',
+    //       path: 'ftp/path1/file_1.jpg',
+    //       folder: false
+    //     },
+    //     {
+    //       name: 'file_18.jpg',
+    //       path: 'ftp/path1/file_18.jpg',
+    //       folder: false
+    //     },
+    //     {
+    //       name: 'folder_19',
+    //       path: 'ftp/path1/folder19',
+    //       folder: true,
+    //       iconClasses: 'filespart-files-icon-folder'
+    //     },
+    //     {
+    //       name: 'file_1.jpg',
+    //       path: 'ftp/path1/file_1.jpg',
+    //       folder: false
+    //     },
+    //     {
+    //       name: 'file_10.jpg',
+    //       path: 'ftp/path1/file_10.jpg',
+    //       folder: false
+    //     }
+    //   ]);
+    // });
     
-    picker2.navigate();
+    // picker2.navigate();
     
     document.getElementById('use-selected-1-btn').onclick = function() {
       document.getElementById('selected-output-1').innerHTML = JSON.stringify(picker1.getSelected());
     };
            
-    document.getElementById('use-selected-2-btn').onclick = function() {
-      document.getElementById('selected-output-2').innerHTML = JSON.stringify(picker2.getSelected());
-    };
+    // document.getElementById('use-selected-2-btn').onclick = function() {
+    //   document.getElementById('selected-output-2').innerHTML = JSON.stringify(picker2.getSelected());
+    // };
     
     document.getElementById('set-listmode-btn').onclick = function() {
       picker1.setViewMode('list');

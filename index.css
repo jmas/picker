@@ -79,12 +79,12 @@
 }
 
 .filespart-files-icon-havebg {
-  background-size: cover;
+  background-size: contain;
 }
 
-.filespart-files-icon-file {
+/*.filespart-files-icon-file {
   background-image: url(https://raw.githubusercontent.com/google/material-design-icons/master/file/1x_web/ic_folder_black_48dp.png);
-}
+}*/
 
 .filespart-files-icon-image {
   background-image: url(https://raw.githubusercontent.com/google/material-design-icons/master/image/1x_web/ic_image_black_48dp.png);
@@ -166,5 +166,5 @@
 
 .filespart-files-icon-folder {
   background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAAA3NCSVQICAjb4U/gAAAACXBIWXMAAAGpAAABqQEMBjChAAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAAAFRQTFRF////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAsI6hEwAAABt0Uk5TAAUHFRwwOD5QVVdwcYCOkKOqsMXH0OPq7Pj65uqxfQAAAO1JREFUWMPt1LEOgkAURNErIooiiiKK8///acGjsuJNYwzT78lmuQHW/cD0tbMLLBTkCnIFuYJcQa4gV1BiK/C3wOD+UDoXaFygMoGxAHaJ93wE0ANcEsApgBbYPJeff28DqIFD4gK3+Q1K4JYADgEMwPa9/PxzE0AHnBIXuMyfsQEeCWA3A1U2ggDGIhtBAH06ggDadAQB1OkIAijTEUzAkI9gArp8BBPQ5COYgCofASCNRT4CQOqNCACpNSIApNqIAJBKIwJAgxMBoM6JAFDjRABo70QAjEcnAqC3IgCuVgTA3YoAeFkRrPuNfQA67vzqcECy0gAAAABJRU5ErkJggge1eb292245e478ca94d069580f8269b2);
-  background-color: #eee;
+  /*background-color: #eee;*/
 }
