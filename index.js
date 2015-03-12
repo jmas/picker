@@ -85,7 +85,7 @@
       el = document.createElement('SPAN');
       instance.breadcrumbsContainer.appendChild(el);
       name = (pathItems[i] === '' ? 'Home': pathItems[i]);
-      partialPath.push(pathItems[i]);
+      pathItems[i] !== '' && partialPath.push(pathItems[i]);
       el.outerHTML = breadcrumbTpl
         .replace(/{path}/g, partialPath.join('/'))
         .replace(/{name}/g, name);
