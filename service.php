@@ -15,6 +15,21 @@ if (empty($path)) {
 				'name'=>'Dropbox',
 				'path'=>'Dropbox',
 				'folder'=>true,
+			],
+			[
+				'name'=>'Facebook',
+				'path'=>'Facebook',
+				'folder'=>true,
+			],
+			[
+				'name'=>'Google Drive',
+				'path'=>'GoogleDrive',
+				'folder'=>true,
+			],
+			[
+				'name'=>'Flickr',
+				'path'=>'Flickr',
+				'folder'=>true,
 			]
 		],
 		'error'=>null,

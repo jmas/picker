@@ -66,7 +66,13 @@
     // First picker instance
     var picker1 = new Picker({
       container: document.getElementById('picker-1'), // Optional.
-      viewMode: 'icons'
+      viewMode: 'icons',
+      // filterFn: function(item) {
+      //   if (! item.folder && ! /(gif|jpeg|jpg|png)$/i.test(item.name)) {
+      //     return false;
+      //   }
+      //   return true;
+      // }
       // viewMode: 'list'
     });
     // You need to define this hadler for async requests for get picker items.

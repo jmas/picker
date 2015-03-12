@@ -2,7 +2,7 @@
   'use strict';
   
   var tpl = '<div class="filespart"><div class="filespart-breadcrumbs" data-breadcrumbs-container></div><div class="filespart-files"><div class="filespart-files-inside" data-items-container></div></div>';
-  var itemTpl = '<label class="filespart-files-item" data-folder="{folder}" data-path="{path}"><span class="filespart-files-icon {iconClasses}" {iconAttrs}></span><span class="filespart-files-name" title="{name}">{name}</a><input type="checkbox" data-path="{path}" {checked} /><span class="filespart-files-mark"></span></label>';
+  var itemTpl = '<label class="filespart-files-item" data-folder="{folder}" data-path="{path}"><span class="filespart-files-item-inside"><span class="filespart-files-icon {iconClasses}" {iconAttrs}></span><span class="filespart-files-name" title="{name}">{name}</a><input type="checkbox" data-path="{path}" {checked} /><span class="filespart-files-mark"></span></span></label>';
   var breadcrumbTpl = '<a class="filespart-breadcrumbs-item" nohref nofollow data-path="{path}">{name}</a>';
   var body = document.getElementsByTagName('BODY')[0];
   
@@ -39,12 +39,14 @@
       instance.breadcrumbsContainer = instance.container.querySelector('[data-breadcrumbs-container]');
       instance.breadcrumbsContainer.onclick = function(event) {
         event.stopPropagation();
-        whenBreadcrumbsNavigate(instance, findParentNodeWithAttr(event.target, 'data-path'), event);
+        navigateByBreadcrumb(instance, findParentNodeWithAttr(event.target, 'data-path'));
       };
       instance.itemsContainer.onclick = function(event) {
         if (event.target.hasAttribute('data-path')) {
           event.stopPropagation();
-          whenItemsNavigate(instance, findParentNodeWithAttr(event.target, 'data-folder'), event);
+          if (navigateByItem(instance, findParentNodeWithAttr(event.target, 'data-folder')) === false) {
+            event.preventDefault();
+          }
         }
       };
       instance.containerRendered = true;
@@ -53,25 +55,32 @@
     // render items
     instance.itemsContainer.innerHTML = '';
     var el,i,ln,iconClasses,iconStyles,isChecked;
-    for (i=0,ln=instance.items.length; i<ln; i++) {
+    var items = instance.items;
+    if (typeof instance.sortFn === 'function') {
+      items = items.sort(instance.sortFn);
+    }
+    for (i=0,ln=items.length; i<ln; i++) {
+      if (typeof instance.filterFn === 'function' && instance.filterFn(items[i]) === false) {
+        continue;
+      }
       el = document.createElement('DIV');
       instance.itemsContainer.appendChild(el);
-      iconClasses = typeof instance.items[i].iconClasses === 'undefined' ? '': instance.items[i].iconClasses;
+      iconClasses = typeof items[i].iconClasses === 'undefined' ? '': items[i].iconClasses;
       iconStyles = '';
-      if (typeof instance.items[i].iconImage !== 'undefined' && instance.items[i].iconImage !== null) {
-        iconStyles += 'background-image:url('+instance.items[i].iconImage+');';
+      if (typeof items[i].iconImage !== 'undefined' && items[i].iconImage !== null) {
+        iconStyles += 'background-image:url(\''+items[i].iconImage+'\');';
         iconClasses += ' filespart-files-icon-havebg ';
       }
-      if (typeof instance.items[i].iconColor !== 'undefined') {
-        iconStyles += 'background-color:'+instance.items[i].iconColor+';';
+      if (typeof items[i].iconColor !== 'undefined') {
+        iconStyles += 'background-color:'+items[i].iconColor+';';
       }
       iconStyles = iconStyles === '' ? '': ' style="'+iconStyles+'" ';
       el.outerHTML = itemTpl
-        .replace(/{name}/g, instance.items[i].name)
-        .replace(/{path}/g, instance.items[i].path)
-        .replace(/{folder}/g, instance.items[i].folder)
+        .replace(/{name}/g, items[i].name)
+        .replace(/{path}/g, items[i].path)
+        .replace(/{folder}/g, items[i].folder)
         .replace(/{iconClasses}/g, iconClasses)
-        .replace(/{checked}/g, findSelectedIndex(instance, instance.items[i].path) !== -1 ? 'checked': '')
+        .replace(/{checked}/g, findSelectedIndex(instance, items[i].path) !== -1 ? 'checked': '')
         .replace(/{iconAttrs}/g, iconStyles);
     }
     // render breadcrumbs
@@ -92,8 +101,8 @@
     }
   }
   
-  function navigate(instance, newPath) {
-    newPath = typeof newPath === 'undefined' ? '': String(newPath);
+  function navigateByPath(instance, newPath) {
+    newPath = typeof newPath === 'undefined' ? instance.path: String(newPath);
     var i,ln,foundedItem=null;
     for (i=0,ln=instance.items.length; i<ln; i++) {
       if (instance.items[i].path === newPath) {
@@ -113,15 +122,15 @@
     }
   }
   
-  function whenBreadcrumbsNavigate(instance, target) {
-    navigate(instance, target.getAttribute('data-path'));
+  function navigateByBreadcrumb(instance, target) {
+    navigateByPath(instance, target.getAttribute('data-path'));
   }
   
-  function whenItemsNavigate(instance, target, event) {
+  function navigateByItem(instance, target) {
     var targetFolder = target.getAttribute('data-folder') === 'true' ? true: false;
     var targetPath = target.getAttribute('data-path');
     if (targetFolder) {
-      navigate(instance, targetPath);
+      navigateByPath(instance, targetPath);
     } else {
       var selectedIndex = findSelectedIndex(instance, target.getAttribute('data-path'));
       if (selectedIndex !== -1) {
@@ -147,9 +156,22 @@
         }
       }
       if (typeof instance.selectCb === 'function') {
-        instance.selectCb(triggeredItem, instance.selected, event);
+        return instance.selectCb(triggeredItem, instance.selected);
       }
     }
+  }
+
+  function defaultSortFn(itemA, itemB) {
+    if (itemA.folder && ! itemB.folder) {
+      return -1;
+    } else if (!itemA.folder && itemB.folder) {
+      return 1;
+    } else if (itemA.name > itemB.name) {
+      return 1;
+    } else if (itemA.name < itemB.name) {
+      return -1;
+    }
+    return 0;
   }
   
   var Cls = function(o) {
@@ -164,7 +186,9 @@
       itemsContainer: null,
       breadcrumbsContainer: null,
       containerRendered: false,
-      viewMode: 'list'
+      viewMode: 'list',
+      filterFn: null,
+      sortFn: defaultSortFn
     };
     // assign options
     for (var k in options) {
@@ -189,11 +213,36 @@
       return this;
     },
     navigate: function(newPath) {
-      navigate(this, newPath);
+      navigateByPath(this, newPath);
       return this;
     },
     setViewMode: function(viewMode) {
       this.viewMode = String(viewMode);
+      render(this);
+      return this;
+    },
+    setItems: function(items) {
+      if (items instanceof Array) {
+        this.items = items;
+        render(this);
+      }
+      return this;
+    },
+    setFilterFn: function(fn) {
+      if (typeof fn === 'function') {
+        this.itemsFilterFn = fn;
+      } else if (fn === null) {
+        this.itemsFilterFn = null;
+      }
+      render(this);
+      return this;
+    },
+    setSortFn: function(fn) {
+      if (typeof fn === 'function') {
+        this.sortFn = fn;
+      } else if (fn === null) {
+        this.sortFn = null;
+      }
       render(this);
       return this;
     },
