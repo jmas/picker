@@ -23,13 +23,11 @@
 
   <p>
     <button id="use-selected-1-btn">Use Selected of 1</button>
-    <!-- <button id="use-selected-2-btn">Use Selected of 2</button> -->
     <button id="set-listmode-btn">Set List mode</button>
     <button id="set-iconsmode-btn">Set Icons mode</button>
   </p>
   
   <p id="selected-output-1"></p>
-  <!-- <p id="selected-output-2"></p> -->
 
   <script src="index.js"></script>
   <script>
@@ -43,8 +41,8 @@
             callback(null, JSON.parse(request.responseText));
           }
         } else if (request.status === 401) {
-          // When service tell us that we are not loggen in.
-          // So we are try log in.
+          // When service tell us that we are not logged in.
+          // So we are try to log in.
           window.__resumeGetJson = function() {
             getJson(url, callback);
           };
