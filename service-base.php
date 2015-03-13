@@ -46,16 +46,16 @@ $servicesCredentials = array(
         'secret'    => '',
     ),
     'facebook' => array(
-        'key'       => '',
-        'secret'    => '',
+        'key'       => FACEBOOK_KEY,
+        'secret'    => FACEBOOK_SECRET,
     ),
     'fitbit' => array(
         'key'       => '',
         'secret'    => '',
     ),
     'flickr' => array(
-        'key'       => '',
-        'secret'    => '',
+        'key'       => FLICKR_KEY,
+        'secret'    => FLICKR_SECRET,
     ),
     'foursquare' => array(
         'key'       => '',

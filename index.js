@@ -2,8 +2,9 @@
   'use strict';
   
   var tpl = '<div class="filespart"><div class="filespart-breadcrumbs" data-breadcrumbs-container></div><div class="filespart-files"><div class="filespart-files-inside" data-items-container></div></div>';
-  var itemTpl = '<label class="filespart-files-item" data-folder="{folder}" data-path="{path}"><span class="filespart-files-item-inside"><span class="filespart-files-icon {iconClasses}" {iconAttrs}></span><span class="filespart-files-name" title="{name}">{name}</a><input type="checkbox" data-path="{path}" {checked} /><span class="filespart-files-mark"></span></span></label>';
+  var itemTpl = '<label class="filespart-files-item {itemClass}" data-folder="{folder}" data-path="{path}"><span class="filespart-files-item-inside"><span class="filespart-files-icon {iconClasses}" {iconAttrs}></span><span class="filespart-files-name" title="{name}">{name}</a><input type="checkbox" data-path="{path}" {checked} /><span class="filespart-files-mark"></span><span class="filespart-files-preloader" data-filespart-files-preloader></span></span></label>';
   var breadcrumbTpl = '<a class="filespart-breadcrumbs-item" nohref nofollow data-path="{path}">{name}</a>';
+  var emptyTpl = '<div class="filespart-empty">No items here.</div>';
   var body = document.getElementsByTagName('BODY')[0];
   
   function findParentNodeWithAttr(el, attrName) {
@@ -39,11 +40,17 @@
       instance.breadcrumbsContainer = instance.container.querySelector('[data-breadcrumbs-container]');
       instance.breadcrumbsContainer.onclick = function(event) {
         event.stopPropagation();
-        navigateByBreadcrumb(instance, findParentNodeWithAttr(event.target, 'data-path'));
+        if (instance.inNavigateState) {
+          event.preventDefault();
+        } else {
+          navigateByBreadcrumb(instance, findParentNodeWithAttr(event.target, 'data-path'));
+        }
       };
       instance.itemsContainer.onclick = function(event) {
-        if (event.target.hasAttribute('data-path')) {
-          event.stopPropagation();
+        event.stopPropagation();
+        if (instance.inNavigateState) {
+          event.preventDefault();
+        } else if (event.target.hasAttribute('data-path')) {
           if (navigateByItem(instance, findParentNodeWithAttr(event.target, 'data-folder')) === false) {
             event.preventDefault();
           }
@@ -59,29 +66,34 @@
     if (typeof instance.sortFn === 'function') {
       items = items.sort(instance.sortFn);
     }
-    for (i=0,ln=items.length; i<ln; i++) {
-      if (typeof instance.filterFn === 'function' && instance.filterFn(items[i]) === false) {
-        continue;
+    if (items.length > 0) {
+      for (i=0,ln=items.length; i<ln; i++) {
+        if (typeof instance.filterFn === 'function' && instance.filterFn(items[i]) === false) {
+          continue;
+        }
+        el = document.createElement('DIV');
+        instance.itemsContainer.appendChild(el);
+        iconClasses = typeof items[i].iconClasses === 'undefined' ? '': items[i].iconClasses;
+        iconStyles = '';
+        if (typeof items[i].iconImage !== 'undefined' && items[i].iconImage !== null) {
+          iconStyles += 'background-image:url(\''+items[i].iconImage+'\');';
+          iconClasses += ' filespart-files-icon-havebg ';
+        }
+        if (typeof items[i].iconColor !== 'undefined') {
+          iconStyles += 'background-color:'+items[i].iconColor+';';
+        }
+        iconStyles = iconStyles === '' ? '': ' style="'+iconStyles+'" ';
+        el.outerHTML = itemTpl
+          .replace(/{itemClass}/g, items[i].folder ? 'filespart-files-item-folder': 'filespart-files-item-file')
+          .replace(/{name}/g, items[i].name)
+          .replace(/{path}/g, items[i].path)
+          .replace(/{folder}/g, items[i].folder)
+          .replace(/{iconClasses}/g, iconClasses)
+          .replace(/{checked}/g, findSelectedIndex(instance, items[i].path) !== -1 ? 'checked': '')
+          .replace(/{iconAttrs}/g, iconStyles);
       }
-      el = document.createElement('DIV');
-      instance.itemsContainer.appendChild(el);
-      iconClasses = typeof items[i].iconClasses === 'undefined' ? '': items[i].iconClasses;
-      iconStyles = '';
-      if (typeof items[i].iconImage !== 'undefined' && items[i].iconImage !== null) {
-        iconStyles += 'background-image:url(\''+items[i].iconImage+'\');';
-        iconClasses += ' filespart-files-icon-havebg ';
-      }
-      if (typeof items[i].iconColor !== 'undefined') {
-        iconStyles += 'background-color:'+items[i].iconColor+';';
-      }
-      iconStyles = iconStyles === '' ? '': ' style="'+iconStyles+'" ';
-      el.outerHTML = itemTpl
-        .replace(/{name}/g, items[i].name)
-        .replace(/{path}/g, items[i].path)
-        .replace(/{folder}/g, items[i].folder)
-        .replace(/{iconClasses}/g, iconClasses)
-        .replace(/{checked}/g, findSelectedIndex(instance, items[i].path) !== -1 ? 'checked': '')
-        .replace(/{iconAttrs}/g, iconStyles);
+    } else {
+      instance.itemsContainer.innerHTML = emptyTpl;
     }
     // render breadcrumbs
     instance.breadcrumbsContainer.innerHTML = '';
@@ -111,6 +123,7 @@
       }
     }
     if (typeof instance.navigateCb === 'function') {
+      instance.inNavigateState = true;
       instance.navigateCb(function(newItems) {
         if (newItems instanceof Array) {
           instance.items = newItems;
@@ -118,6 +131,7 @@
           instance.itemsContainer.parentNode.scrollTop = 0;
           render(instance);
         }
+        instance.inNavigateState = false;
       }, newPath, foundedItem);
     }
   }
@@ -130,7 +144,9 @@
     var targetFolder = target.getAttribute('data-folder') === 'true' ? true: false;
     var targetPath = target.getAttribute('data-path');
     if (targetFolder) {
+      target.querySelector('[data-filespart-files-preloader]').className = 'filespart-files-preloader filespart-files-preloader-active';
       navigateByPath(instance, targetPath);
+      return false;
     } else {
       var selectedIndex = findSelectedIndex(instance, target.getAttribute('data-path'));
       if (selectedIndex !== -1) {
@@ -164,7 +180,7 @@
   function defaultSortFn(itemA, itemB) {
     if (itemA.folder && ! itemB.folder) {
       return -1;
-    } else if (!itemA.folder && itemB.folder) {
+    } else if (! itemA.folder && itemB.folder) {
       return 1;
     } else if (itemA.name > itemB.name) {
       return 1;
@@ -186,6 +202,7 @@
       itemsContainer: null,
       breadcrumbsContainer: null,
       containerRendered: false,
+      inNavigateState: false,
       viewMode: 'list',
       filterFn: null,
       sortFn: defaultSortFn

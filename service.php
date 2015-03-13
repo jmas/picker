@@ -3,6 +3,7 @@
 require(__DIR__ . '/service-base.php');
 
 use OAuth\OAuth2\Service\Dropbox;
+use OAuth\OAuth2\Service\Facebook;
 use OAuth\Common\Storage\Session;
 use OAuth\Common\Consumer\Credentials;
 
@@ -30,7 +31,32 @@ if (empty($path)) {
 				'name'=>'Flickr',
 				'path'=>'Flickr',
 				'folder'=>true,
-			]
+			],
+			[
+				'name'=>'Instagram',
+				'path'=>'Instagram',
+				'folder'=>true,
+			],
+			[
+				'name'=>'Twitter',
+				'path'=>'Twitter',
+				'folder'=>true,
+			],
+			[
+				'name'=>'VKontakte',
+				'path'=>'VKontakte',
+				'folder'=>true,
+			],
+			[
+				'name'=>'One Drive',
+				'path'=>'OneDrive',
+				'folder'=>true,
+			],
+			[
+				'name'=>'Already Used',
+				'path'=>'AlreadyUsed',
+				'folder'=>true,
+			],
 		],
 		'error'=>null,
 	]);
@@ -38,7 +64,7 @@ if (empty($path)) {
 }
 
 $storage = new Session();
-
+// $storage->clearToken('Facebook');
 if (strpos($path, 'Dropbox') === 0) {
 	if (! $storage->hasAccessToken('Dropbox')) {
 		header('HTTP/1.1 401 Unauthorized', true, 401);
@@ -55,13 +81,13 @@ if (strpos($path, 'Dropbox') === 0) {
 	);
 	// Instantiate the Dropbox service using the credentials, http client and storage mechanism for the token
 	/** @var $dropboxService Dropbox */
-	$dropboxService = $serviceFactory->createService('dropbox', $credentials, $storage, array());
+	$service = $serviceFactory->createService('dropbox', $credentials, $storage, array());
 
-	$response = json_decode($dropboxService->request('/metadata/auto/' . $path), true);
+	$response = json_decode($service->request('/metadata/auto/' . $path), true);
 
-	// $token = $dropboxService->requestAccessToken($_GET['code']);
+	// $token = $service->requestAccessToken($_GET['code']);
 
-	// var_dump(json_decode($dropboxService->request('/metadata/auto/'), true));
+	// var_dump(json_decode($service->request('/metadata/auto/'), true));
 	// die;
 
 	$token = $storage->retrieveAccessToken('Dropbox')->getAccessToken();
@@ -81,6 +107,125 @@ if (strpos($path, 'Dropbox') === 0) {
 		}
 	}
 
+	echo json_encode([
+		'result'=>$items,
+		'error'=>null,
+	]);
+}
+
+if (strpos($path, 'Facebook') === 0) {
+	// $storage->clearToken('Facebook');
+	if (! $storage->hasAccessToken('Facebook')) {
+		header('HTTP/1.1 401 Unauthorized', true, 401);
+		die;
+	}
+
+	$path = substr($path, strlen('Facebook') + 1);
+	$path = $path ? $path: '';
+
+	// Setup the credentials for the requests
+	$credentials = new Credentials(
+	    $servicesCredentials['facebook']['key'],
+	    $servicesCredentials['facebook']['secret'],
+	    $currentUri->getAbsoluteUri()
+	);
+	// Instantiate the Dropbox service using the credentials, http client and storage mechanism for the token
+	/** @var $dropboxService Dropbox */
+	$service = $serviceFactory->createService('facebook', $credentials, $storage, array('user_photos'));
+
+	$items = [];
+
+	if (empty($path)) {
+		$response = json_decode($service->request('/me/albums'), true);
+		
+		if (isset($response['data'])) {
+			foreach ($response['data'] as $item) {
+				$items[] = [
+					'name'=>$item['name'],
+					'folder'=>true,
+					'path'=>'Facebook/' . $item['name'],
+					// 'iconImage'=>! empty($item['mime_type']) && ($item['mime_type'] == 'image/jpeg' || $item['mime_type'] == 'image/png' || $item['mime_type'] == 'image/gif') ? 'https://api-content.dropbox.com/1/thumbnails/auto' . $item['path'] . '?size=m&access_token=' . $token: null,
+					'iconClasses'=>'filespart-files-icon-folder',
+				];
+			}
+		}
+	} else {
+		$response = json_decode($service->request('/me/albums'), true);
+
+		if (isset($response['data'])) {
+			$founded = null;
+			foreach ($response['data'] as $item) {
+				if ($item['name'] === $path) {
+					$founded = $item;
+					break;
+				}
+			}
+			$response = json_decode($service->request('/' . $item['id'] . '/photos'), true);
+			if (isset($response['data'])) {
+				// var_dump($response['data']); die;
+				foreach ($response['data'] as $item) {
+					$items[] = [
+						'name'=>empty($item['name']) ? 'Photo': $item['name'],
+						'folder'=>false,
+						'path'=>'Facebook/' . $path . '/' . $item['id'],
+						'iconImage'=>$item['images'][count($item['images'])-1]['source'],
+						'iconClasses'=>'filespart-files-icon-image',
+					];
+				}
+			}
+		}
+	}
+
+	// $token = $dropboxService->requestAccessToken($_GET['code']);
+
+	// var_dump(json_decode($dropboxService->request('/metadata/auto/'), true));
+	// die;
+
+	$token = $storage->retrieveAccessToken('Facebook')->getAccessToken();
+
+	echo json_encode([
+		'result'=>$items,
+		'error'=>null,
+	]);
+}
+
+if (strpos($path, 'Flickr') === 0) {
+	// $storage->clearToken('Facebook');
+	if (! $storage->hasAccessToken('Flickr')) {
+		header('HTTP/1.1 401 Unauthorized', true, 401);
+		die;
+	}
+
+	// Setup the credentials for the requests
+	$credentials = new Credentials(
+		$servicesCredentials['flickr']['key'],
+		$servicesCredentials['flickr']['secret'],
+		$currentUri->getAbsoluteUri()
+	);
+
+	$flickrService = $serviceFactory->createService('Flickr', $credentials, $storage);
+
+	$response = json_decode($flickrService->request('flickr.photos.search', 'GET', null, [], ['user_id'=>'67862293@N05','format'=>'json','nojsoncallback'=>1]), true);
+
+	// var_dump($response); die;
+
+	$items = [];
+
+	if (isset($response['photos']) && isset($response['photos']['photo'])) {
+		foreach ($response['photos']['photo'] as $item) {
+			$items[] = [
+				'name'=>empty($item['title']) ? 'Photo': $item['title'],
+				'folder'=>false,
+				'path'=>'Flickr/' . $item['id'],
+				'iconImage'=>'https://farm'.$item['farm'].'.staticflickr.com/'.$item['server'].'/'.$item['id'].'_'.$item['secret'].'_m.jpg',
+				'iconClasses'=>'filespart-files-icon-image',
+			];
+		}
+	}
+
+	// $xml = simplexml_load_string();
+	// print "status: ".(string)$xml->attributes()->stat."\n";
+	// var_dump();
 	echo json_encode([
 		'result'=>$items,
 		'error'=>null,

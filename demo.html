@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title></title>
+  <title>Picker Demo</title>
   <style>
     @import "index.css";
     
@@ -31,81 +31,122 @@
 
   <script src="index.js"></script>
   <script>
-    function getJson(url, callback) {
-      var request = new XMLHttpRequest();
-      request.open('GET', url, true);
-      request.onload = function() {
-        if (request.status >= 200 && request.status < 400) {
-          // Success
-          if (typeof callback === 'function') {
-            callback(null, JSON.parse(request.responseText));
-          }
-        } else if (request.status === 401) {
-          // When service tell us that we are not logged in.
-          // So we are try to log in.
-          window.__resumeGetJson = function() {
-            getJson(url, callback);
-          };
-          window.open('oauth.php');
-        } else {
-          // We reached our target server, but it returned an error
-          if (typeof callback === 'function') {
-            callback("We get error from service.");
-          }
-        }
-      };
-      request.onerror = function() {
-        // There was a connection error of some sort
-        if (typeof callback === 'function') {
-          callback("We can't request service.");
-        }
-      };
-      request.send();
-    }
+    (function() {
+      var activeServices = [];
 
-    // First picker instance
-    var picker1 = new Picker({
-      container: document.getElementById('picker-1'), // Optional.
-      viewMode: 'icons',
-      // filterFn: function(item) {
-      //   if (! item.folder && ! /(gif|jpeg|jpg|png)$/i.test(item.name)) {
-      //     return false;
-      //   }
-      //   return true;
-      // }
-      // viewMode: 'list'
-    });
-    // You need to define this hadler for async requests for get picker items.
-    // When user click on folder - this handler is triggered.
-    picker1.onNavigate(function(callback, path, item) {
-      getJson('service.php?path=' + path, function(error, data) {
+      function auth(serviceName, mode, callback) {
+        mode = (! mode ? 0: mode);
+        window.__resumeGetJson = function() {
+          if (typeof callback === 'function') {
+            callback();
+          }
+        };
+        var url = 'oauth.php/' + serviceName;
+        switch(mode) {
+          case 1:
+            location.href = url;
+            break;
+          case 2:
+            window.open(url);
+            break;
+        }
+      }
+
+      function getJson(url, callback) {
+        var request = new XMLHttpRequest();
+        request.open('GET', url, true);
+        request.onload = function() {
+          if (request.status >= 200 && request.status < 400) {
+            // Success
+            if (typeof callback === 'function') {
+              callback(null, JSON.parse(request.responseText));
+            }
+          } else if (request.status === 401) {
+            // When service tell us that we are not logged in.
+            // So we are try to log in.
+            var serviceName = url.substr(url.indexOf('path=') + 5);
+            serviceName = serviceName.indexOf('/') !== -1 ? serviceName.substr(0, url.indexOf('/')): serviceName;
+            auth(serviceName, 1, function() {
+              getJson(url, callback);
+            });
+          } else {
+            // We reached our target server, but it returned an error
+            if (typeof callback === 'function') {
+              callback("We get error from service.");
+            }
+          }
+        };
+        request.onerror = function() {
+          // There was a connection error of some sort
+          if (typeof callback === 'function') {
+            callback("We can't request service.");
+          }
+        };
+        request.send();
+      }
+
+      // First picker instance
+      var picker1 = new Picker({
+        container: document.getElementById('picker-1'), // Optional.
+        viewMode: 'icons',
+        // filterFn: function(item) {
+        //   if (! item.folder && ! /(gif|jpeg|jpg|png)$/i.test(item.name)) {
+        //     return false;
+        //   }
+        //   return true;
+        // }
+        // viewMode: 'list'
+      });
+      // You need to define this hadler for async requests for get picker items.
+      // When user click on folder - this handler is triggered.
+      picker1.onNavigate(function(callback, path, item) {
+        var url = 'service.php?path=' + path;
+        var serviceName = path.indexOf('/') !== -1 ? path.substring(0, path.indexOf('/')): path;
+        var jsonCallback = function(error, data) {
+          if (error) {
+            alert(error);
+            return;
+          }
+          activeServices.push(serviceName);
+          callback(data.result);
+        };
+        if (path !== '' && activeServices.indexOf(serviceName) === -1) {
+          auth(serviceName, 2, function() {
+            getJson(url, jsonCallback);
+          });
+          return;
+        }
+        getJson(url, jsonCallback);
+      });
+      // You can define this handler for retrive selected items.
+      // This handler is triggered each time when user select item.
+      picker1.onSelect(function(triggeredItem, selectedItems) {
+        console && console.log('Triggered item: ', triggeredItem);
+        console && console.log('Selected items: ', selectedItems);
+      });
+      // You need to call this function for trigger onNavigate handler.
+      picker1.navigate();
+      
+      document.getElementById('use-selected-1-btn').onclick = function() {
+        document.getElementById('selected-output-1').innerHTML = JSON.stringify(picker1.getSelected());
+      };
+      
+      document.getElementById('set-listmode-btn').onclick = function() {
+        picker1.setViewMode('list');
+      };
+      
+      document.getElementById('set-iconsmode-btn').onclick = function() {
+        picker1.setViewMode('icons');
+      };
+
+      getJson('oauth.php/status', function(error, data) {
         if (error) {
           alert(error);
           return;
         }
-        callback(data.result);
+        activeServices = data.result;
       });
-    });
-    // You can define this handler for retrive selected items.
-    // This handler is triggered each time when user select item.
-    picker1.onSelect(function(triggeredItem, selectedItems) {
-      console && console.log('Triggered item: ', triggeredItem);
-      console && console.log('Selected items: ', selectedItems);
-    });
-    // You need to call this function for trigger onNavigate handler.
-    picker1.navigate();
-    
-    document.getElementById('use-selected-1-btn').onclick = function() {
-      document.getElementById('selected-output-1').innerHTML = JSON.stringify(picker1.getSelected());
-    };
-    
-    document.getElementById('set-listmode-btn').onclick = function() {
-      picker1.setViewMode('list');
-    };
-    
-    document.getElementById('set-iconsmode-btn').onclick = function() {
-      picker1.setViewMode('icons');
-    };
+    })();
   </script>
 </body>
 </html>
