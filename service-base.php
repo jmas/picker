@@ -66,8 +66,8 @@ $servicesCredentials = array(
         'secret'    => '',
     ),
     'google' => array(
-        'key'       => '',
-        'secret'    => '',
+        'key'       => GOOGLE_KEY,
+        'secret'    => GOOGLE_SECRET,
     ),
     'instagram' => array(
         'key'       => '',

@@ -7,7 +7,7 @@ use OAuth\OAuth2\Service\Facebook;
 use OAuth\Common\Storage\Session;
 use OAuth\Common\Consumer\Credentials;
 
-$services = ['Dropbox','Facebook','Flickr'];
+$services = ['Dropbox','Facebook','Flickr','Google'];
 
 $storage = new Session();
 
@@ -136,6 +136,28 @@ if (isset($_SERVER['PATH_INFO']) && $_SERVER['PATH_INFO'] === '/Flickr') {
 			// $xml = simplexml_load_string($flickrService->request('flickr.test.login'));
 			// print "status: ".(string)$xml->attributes()->stat."\n";
 			break;
+	}
+}
+
+if (isset($_SERVER['PATH_INFO']) && $_SERVER['PATH_INFO'] === '/Google') {
+	// Setup the credentials for the requests
+	$credentials = new Credentials(
+	    $servicesCredentials['google']['key'],
+	    $servicesCredentials['google']['secret'],
+	    $currentUri->getAbsoluteUri()
+	);
+
+	$googleService = $serviceFactory->createService('google', $credentials, $storage, array('googledrive','userinfo_email','userinfo_profile'));
+
+	if (!empty($_GET['code'])) {
+	    try {
+		    $googleService->requestAccessToken($_GET['code']);
+		} catch (\Exception $e) {}
+
+	    echo $successHtml;
+	} else {
+		$url = $googleService->getAuthorizationUri();
+	    header('Location: ' . $url);
 	}
 }
 

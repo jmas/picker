@@ -8,3 +8,6 @@ define('FACEBOOK_SECRET', '');
 
 define('FLICKR_KEY', '');
 define('FLICKR_SECRET', '');
+
+define('GOOGLE_KEY', '');
+define('GOOGLE_SECRET', '');

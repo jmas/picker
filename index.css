@@ -238,6 +238,7 @@
   width: 3em;
   height: 3em;
   border-radius: .2em 0 0 .2em;
+  background-size: 80%;
 }
 
 .filespart-files-list .filespart-files-mark,

@@ -25,8 +25,8 @@ if (empty($path)) {
 				'iconClasses'=>'filespart-files-icon-facebook',
 			],
 			[
-				'name'=>'Google Drive',
-				'path'=>'GoogleDrive',
+				'name'=>'Google',
+				'path'=>'Google',
 				'folder'=>true,
 				'iconClasses'=>'filespart-files-icon-googledrive',
 			],
@@ -55,14 +55,14 @@ if (empty($path)) {
 				'iconClasses'=>'filespart-files-icon-tumblr',
 			],
 			[
-				'name'=>'VK',
-				'path'=>'VK',
+				'name'=>'Vkontakte',
+				'path'=>'Vkontakte',
 				'folder'=>true,
 				'iconClasses'=>'filespart-files-icon-vk',
 			],
 			[
-				'name'=>'One Drive',
-				'path'=>'OneDrive',
+				'name'=>'Microsoft',
+				'path'=>'Microsoft',
 				'folder'=>true,
 				'iconClasses'=>'filespart-files-icon-onedrive',
 			],
@@ -96,8 +96,13 @@ if (strpos($path, 'Dropbox') === 0) {
 	// Instantiate the Dropbox service using the credentials, http client and storage mechanism for the token
 	/** @var $dropboxService Dropbox */
 	$service = $serviceFactory->createService('dropbox', $credentials, $storage, array());
-
-	$response = json_decode($service->request('/metadata/auto/' . $path), true);
+	try {
+		$response = $service->request('/metadata/auto/' . $path);
+	} catch(\Exception $e) {
+		header('HTTP/1.1 401 Unauthorized', true, 401);
+		die;
+	}
+	$response = json_decode($response, true);
 
 	// $token = $service->requestAccessToken($_GET['code']);
 
@@ -149,8 +154,17 @@ if (strpos($path, 'Facebook') === 0) {
 
 	$items = [];
 
+	try {
+		$response = $service->request('/me/albums');
+	} catch(\Exception $e) {
+		header('HTTP/1.1 401 Unauthorized', true, 401);
+		die;
+	}
+
+	$response = json_decode($response, true);
+
 	if (empty($path)) {
-		$response = json_decode($service->request('/me/albums'), true);
+		
 		
 		if (isset($response['data'])) {
 			foreach ($response['data'] as $item) {
@@ -164,8 +178,6 @@ if (strpos($path, 'Facebook') === 0) {
 			}
 		}
 	} else {
-		$response = json_decode($service->request('/me/albums'), true);
-
 		if (isset($response['data'])) {
 			$founded = null;
 			foreach ($response['data'] as $item) {
@@ -174,7 +186,12 @@ if (strpos($path, 'Facebook') === 0) {
 					break;
 				}
 			}
-			$response = json_decode($service->request('/' . $item['id'] . '/photos'), true);
+			try {
+				$response = json_decode($service->request('/' . $item['id'] . '/photos'), true);
+			} catch(\Exception $e) {
+				header('HTTP/1.1 401 Unauthorized', true, 401);
+				die;
+			}
 			if (isset($response['data'])) {
 				// var_dump($response['data']); die;
 				foreach ($response['data'] as $item) {
@@ -195,7 +212,7 @@ if (strpos($path, 'Facebook') === 0) {
 	// var_dump(json_decode($dropboxService->request('/metadata/auto/'), true));
 	// die;
 
-	$token = $storage->retrieveAccessToken('Facebook')->getAccessToken();
+	//$token = $storage->retrieveAccessToken('Facebook')->getAccessToken();
 
 	echo json_encode([
 		'result'=>$items,
@@ -237,9 +254,50 @@ if (strpos($path, 'Flickr') === 0) {
 		}
 	}
 
-	// $xml = simplexml_load_string();
-	// print "status: ".(string)$xml->attributes()->stat."\n";
+	echo json_encode([
+		'result'=>$items,
+		'error'=>null,
+	]);
+}
+
+if (strpos($path, 'Google') === 0) {
+	// $storage->clearToken('Facebook');
+	if (! $storage->hasAccessToken('Google')) {
+		header('HTTP/1.1 401 Unauthorized', true, 401);
+		die;
+	}
+
+	$credentials = new Credentials(
+	    $servicesCredentials['google']['key'],
+	    $servicesCredentials['google']['secret'],
+	    $currentUri->getAbsoluteUri()
+	);
+
+	$googleService = $serviceFactory->createService('google', $credentials, $storage, array('googledrive'));
+	try {
+		$response = $googleService->request('https://www.googleapis.com/drive/v2/files');
+	} catch(\Exception $e) {
+		header('HTTP/1.1 401 Unauthorized', true, 401);
+		die;
+	}
+	$response = json_decode($response, true);
+
 	// var_dump();
+
+	$items = [];
+
+	if (isset($response['items'])) {
+		foreach ($response['items'] as $item) {
+			$items[] = [
+				'name'=>empty($item['title']) ? 'File': $item['title'],
+				'folder'=>false,
+				'path'=>'Google/' . $item['id'],
+				'iconImage'=>isset($item['thumbnailLink']) ? $item['thumbnailLink']: null,
+				'iconClasses'=>'filespart-files-icon-image',
+			];
+		}
+	}
+
 	echo json_encode([
 		'result'=>$items,
 		'error'=>null,
