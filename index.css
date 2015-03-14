@@ -106,6 +106,51 @@
   background-image: url(https://raw.githubusercontent.com/google/material-design-icons/master/action/1x_web/ic_description_white_48dp.png);
 }
 
+.filespart-files-icon-dropbox {
+  background-image: url(images/dropbox-white.png);
+  background-color: #007aea;
+}
+
+.filespart-files-icon-facebook {
+  background-image: url(images/facebook-white.png);
+  background-color: #3b5998;
+}
+
+.filespart-files-icon-flickr {
+  background-image: url(images/flickr-white.png);
+  background-color: #ff1981;
+}
+
+.filespart-files-icon-googledrive {
+  background-image: url(images/googledrive-white.png);
+  background-color: #14aa64;
+}
+
+.filespart-files-icon-instagram {
+  background-image: url(images/instagram-white.png);
+  background-color: #9d7144;
+}
+
+.filespart-files-icon-onedrive {
+  background-image: url(images/onedrive-white.png);
+  background-color: #094ab1;
+}
+
+.filespart-files-icon-tumblr {
+  background-image: url(images/tumblr-white.png);
+  background-color: #43888e;
+}
+
+.filespart-files-icon-twitter {
+  background-image: url(images/twitter-white.png);
+  background-color: #32ccfe;
+}
+
+.filespart-files-icon-vk {
+  background-image: url(images/vk-white.png);
+  background-color: #4c75a3;
+}
+
 .filespart-files-name {
   display: block;
   line-height: 1em;
